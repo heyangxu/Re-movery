@@ -1,0 +1,102 @@
+{
+    "signatures": [
+        {
+            "id": "CWE-78",
+            "name": "OS命令注入",
+            "description": "应用程序在构造操作系统命令时，未对用户输入进行适当的验证，可能导致命令注入攻击。",
+            "severity": "高",
+            "references": [
+                "https://cwe.mitre.org/data/definitions/78.html",
+                "https://owasp.org/www-community/attacks/Command_Injection"
+            ],
+            "code_patterns": [
+                "os\\.system\\(.*\\)",
+                "exec\\.Command\\(.*\\)",
+                "shell\\.Run\\(.*\\)"
+            ],
+            "fix_suggestions": [
+                "使用参数化命令执行",
+                "对用户输入进行严格的验证和过滤",
+                "使用安全的API替代直接的命令执行"
+            ]
+        },
+        {
+            "id": "CWE-89",
+            "name": "SQL注入",
+            "description": "应用程序在构造SQL查询时，未对用户输入进行适当的验证，可能导致SQL注入攻击。",
+            "severity": "高",
+            "references": [
+                "https://cwe.mitre.org/data/definitions/89.html",
+                "https://owasp.org/www-community/attacks/SQL_Injection"
+            ],
+            "code_patterns": [
+                "db\\.Query\\(.*\\+.*\\)",
+                "db\\.Exec\\(.*\\+.*\\)",
+                "sql\\.Raw\\(.*\\)"
+            ],
+            "fix_suggestions": [
+                "使用参数化查询",
+                "使用ORM框架",
+                "对用户输入进行验证和转义"
+            ]
+        },
+        {
+            "id": "CWE-200",
+            "name": "敏感信息泄露",
+            "description": "应用程序可能在日志、错误消息或响应中泄露敏感信息。",
+            "severity": "中",
+            "references": [
+                "https://cwe.mitre.org/data/definitions/200.html"
+            ],
+            "code_patterns": [
+                "log\\.Print\\(.*password.*\\)",
+                "fmt\\.Printf\\(.*secret.*\\)",
+                "\\.Debug\\(.*key.*\\)"
+            ],
+            "fix_suggestions": [
+                "避免记录敏感信息",
+                "使用适当的日志级别",
+                "实现敏感数据的脱敏处理"
+            ]
+        },
+        {
+            "id": "CWE-22",
+            "name": "路径遍历",
+            "description": "应用程序在处理文件路径时，未对用户输入进行适当的验证，可能导致路径遍历攻击。",
+            "severity": "高",
+            "references": [
+                "https://cwe.mitre.org/data/definitions/22.html",
+                "https://owasp.org/www-community/attacks/Path_Traversal"
+            ],
+            "code_patterns": [
+                "os\\.Open\\(.*\\)",
+                "ioutil\\.ReadFile\\(.*\\)",
+                "os\\.ReadFile\\(.*\\)"
+            ],
+            "fix_suggestions": [
+                "使用filepath.Clean()规范化路径",
+                "限制文件操作在特定目录内",
+                "验证文件路径不包含危险字符"
+            ]
+        },
+        {
+            "id": "CWE-326",
+            "name": "弱加密",
+            "description": "应用程序使用了不安全或已过时的加密算法。",
+            "severity": "中",
+            "references": [
+                "https://cwe.mitre.org/data/definitions/326.html"
+            ],
+            "code_patterns": [
+                "md5\\.New\\(\\)",
+                "sha1\\.New\\(\\)",
+                "des\\.NewCipher\\(.*\\)"
+            ],
+            "fix_suggestions": [
+                "使用强加密算法（如AES）",
+                "使用足够长度的密钥",
+                "定期更新加密算法"
+            ]
+        }
+    ]
+} 

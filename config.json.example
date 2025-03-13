@@ -1,0 +1,45 @@
+{
+    "processing": {
+        "num_workers": 4,
+        "enable_cache": true,
+        "cache_dir": ".cache",
+        "max_file_size_mb": 10
+    },
+    "detector": {
+        "min_similarity": 0.8,
+        "enable_semantic_match": true,
+        "ignore_comments": true,
+        "ignore_whitespace": true,
+        "max_line_distance": 100,
+        "context_lines": 5
+    },
+    "analyzer": {
+        "languages": ["go"],
+        "parse_comments": true,
+        "parse_imports": true,
+        "parse_types": true
+    },
+    "reporter": {
+        "output_format": "html",
+        "include_source": true,
+        "group_by_severity": true,
+        "min_severity": "low",
+        "template_dir": "web/templates"
+    },
+    "logging": {
+        "level": "info",
+        "file": "movery.log",
+        "format": "text",
+        "include_timestamp": true
+    },
+    "security": {
+        "max_memory_gb": 8.0,
+        "timeout_seconds": 3600,
+        "exclude_patterns": [
+            "vendor/**",
+            "node_modules/**",
+            "**/*_test.go",
+            "**/*.min.js"
+        ]
+    }
+} 

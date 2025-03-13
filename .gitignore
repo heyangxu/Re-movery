@@ -20,6 +20,18 @@ wheels/
 .installed.cfg
 *.egg
 
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+/go/bin/
+/go/pkg/
+
 # IDE
 .idea/
 .vscode/
