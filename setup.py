@@ -7,8 +7,8 @@ with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="re-movery",
-    version="1.0.0",
+    name="movery",
+    version="0.1.0",
     author="heyangxu",
     author_email="",
     description="A tool for discovering modified vulnerable code clones",
@@ -31,6 +31,8 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
+        "pytest>=7.3.1",
+        "coverage>=7.2.7",
         "jinja2>=3.0.0",
         "plotly>=5.0.0",
         "pandas>=1.3.0",
@@ -46,7 +48,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "movery=src.main:main",
+            "movery=movery.main:main",
         ],
     },
     package_data={

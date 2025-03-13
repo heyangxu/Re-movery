@@ -7,7 +7,7 @@ __author__ = "heyangxu"
 __email__ = ""
 
 from .config.config import config
-from .detectors.vulnerability import detector
-from .reporters.html import reporter
+from .detectors.vulnerability import VulnerabilityDetector
+from .utils.security import SecurityChecker
 
-__all__ = ["config", "detector", "reporter"] 
+__all__ = ["config", "VulnerabilityDetector", "SecurityChecker"] 

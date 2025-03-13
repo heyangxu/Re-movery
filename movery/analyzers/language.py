@@ -15,7 +15,7 @@ import json
 
 from movery.config.config import config
 from movery.utils.logging import get_logger
-from movery.utils.memory import MemoryMappedFile
+from movery.utils.memory import MemoryMappedFile, MemoryMonitor
 
 logger = get_logger(__name__)
 

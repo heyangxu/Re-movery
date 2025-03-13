@@ -1,0 +1,58 @@
+{
+    "processing": {
+        "num_processes": 4,
+        "max_memory_usage": 8589934592,
+        "chunk_size": 1048576,
+        "enable_cache": true,
+        "cache_dir": ".cache",
+        "cache_max_size": 1073741824,
+        "supported_languages": [
+            "c",
+            "cpp",
+            "java", 
+            "python",
+            "go",
+            "javascript"
+        ]
+    },
+    "detector": {
+        "min_similarity": 0.8,
+        "max_edit_distance": 10,
+        "context_lines": 3,
+        "max_ast_depth": 50,
+        "max_cfg_nodes": 1000,
+        "enable_semantic_match": true,
+        "enable_syntax_match": true,
+        "enable_token_match": true,
+        "report_format": "html",
+        "report_dir": "reports",
+        "exclude_patterns": [
+            "**/test/*",
+            "**/tests/*",
+            "**/vendor/*",
+            "**/node_modules/*"
+        ]
+    },
+    "logging": {
+        "log_level": "INFO",
+        "log_file": "movery.log",
+        "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "enable_profiling": false,
+        "profile_output": "profile.stats",
+        "show_progress": true,
+        "progress_interval": 1
+    },
+    "security": {
+        "max_file_size": 104857600,
+        "allowed_schemes": [
+            "file",
+            "http",
+            "https"
+        ],
+        "enable_sandbox": true,
+        "sandbox_timeout": 60,
+        "require_auth": false,
+        "rate_limit": 100,
+        "rate_limit_period": 60
+    }
+} 

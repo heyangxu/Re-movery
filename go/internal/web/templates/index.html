@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re-movery - 安全漏洞扫描工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .severity-high {
+            color: #dc3545;
+        }
+        .severity-medium {
+            color: #fd7e14;
+        }
+        .severity-low {
+            color: #0dcaf0;
+        }
+        .chart-container {
+            height: 300px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+        }
+        .file-item {
+            cursor: pointer;
+        }
+        .file-item:hover {
+            background-color: #f8f9fa;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #f8f9fa;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shield-check"></i> Re-movery
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" data-bs-toggle="pill" data-bs-target="#dashboard">仪表盘</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#scan" data-bs-toggle="pill" data-bs-target="#scan">扫描</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#results" data-bs-toggle="pill" data-bs-target="#results">结果</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#settings" data-bs-toggle="pill" data-bs-target="#settings">设置</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <div class="tab-content">
+            <!-- 仪表盘 -->
+            <div class="tab-pane fade show active" id="dashboard">
+                <h2 class="mb-4">仪表盘</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-exclamation-triangle-fill text-danger"></i> 高危漏洞
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 class="severity-high" id="high-count">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-exclamation-triangle-fill text-warning"></i> 中危漏洞
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 class="severity-medium" id="medium-count">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-exclamation-triangle-fill text-info"></i> 低危漏洞
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 class="severity-low" id="low-count">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-pie-chart-fill"></i> 漏洞严重程度分布
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="severity-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart-fill"></i> 常见漏洞类型
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="vulnerability-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 扫描 -->
+            <div class="tab-pane fade" id="scan">
+                <h2 class="mb-4">扫描</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-file-earmark-code"></i> 扫描文件
+                            </div>
+                            <div class="card-body">
+                                <form id="file-scan-form">
+                                    <div class="mb-3">
+                                        <label for="file" class="form-label">选择文件</label>
+                                        <input class="form-control" type="file" id="file" name="file">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> 扫描
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-folder"></i> 扫描目录
+                            </div>
+                            <div class="card-body">
+                                <form id="directory-scan-form">
+                                    <div class="mb-3">
+                                        <label for="directory" class="form-label">目录路径</label>
+                                        <input type="text" class="form-control" id="directory" name="directory" placeholder="/path/to/directory">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="exclude" class="form-label">排除模式（逗号分隔）</label>
+                                        <input type="text" class="form-control" id="exclude" name="exclude" placeholder="node_modules,*.min.js">
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="parallel" name="parallel">
+                                        <label class="form-check-label" for="parallel">
+                                            启用并行处理
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="incremental" name="incremental">
+                                        <label class="form-check-label" for="incremental">
+                                            启用增量扫描
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> 扫描
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果 -->
+            <div class="tab-pane fade" id="results">
+                <h2 class="mb-4">扫描结果</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-list-ul"></i> 漏洞列表
+                    </div>
+                    <div class="card-body">
+                        <div id="results-container">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> 请先扫描文件或目录以查看结果。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置 -->
+            <div class="tab-pane fade" id="settings">
+                <h2 class="mb-4">设置</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-gear"></i> 扫描设置
+                    </div>
+                    <div class="card-body">
+                        <form id="settings-form">
+                            <div class="mb-3">
+                                <label for="confidence-threshold" class="form-label">置信度阈值</label>
+                                <input type="range" class="form-range" min="0" max="1" step="0.1" id="confidence-threshold" value="0.7">
+                                <div class="text-center" id="confidence-value">0.7</div>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="default-parallel" checked>
+                                <label class="form-check-label" for="default-parallel">
+                                    默认启用并行处理
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="default-incremental" checked>
+                                <label class="form-check-label" for="default-incremental">
+                                    默认启用增量扫描
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> 保存设置
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>Re-movery - 安全漏洞扫描工具 &copy; 2023</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 初始化图表
+        const severityChart = new Chart(
+            document.getElementById('severity-chart'),
+            {
+                type: 'pie',
+                data: {
+                    labels: ['高危', '中危', '低危'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#dc3545', '#fd7e14', '#0dcaf0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            }
+        );
+
+        const vulnerabilityChart = new Chart(
+            document.getElementById('vulnerability-chart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '漏洞数量',
+                        data: [],
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+        // 加载设置
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('re-movery-settings') || '{}');
+            document.getElementById('confidence-threshold').value = settings.confidenceThreshold || 0.7;
+            document.getElementById('confidence-value').textContent = settings.confidenceThreshold || 0.7;
+            document.getElementById('default-parallel').checked = settings.defaultParallel !== false;
+            document.getElementById('default-incremental').checked = settings.defaultIncremental !== false;
+            
+            // 应用设置到扫描表单
+            document.getElementById('parallel').checked = settings.defaultParallel !== false;
+            document.getElementById('incremental').checked = settings.defaultIncremental !== false;
+        }
+
+        // 保存设置
+        document.getElementById('settings-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const settings = {
+                confidenceThreshold: parseFloat(document.getElementById('confidence-threshold').value),
+                defaultParallel: document.getElementById('default-parallel').checked,
+                defaultIncremental: document.getElementById('default-incremental').checked
+            };
+            localStorage.setItem('re-movery-settings', JSON.stringify(settings));
+            alert('设置已保存');
+            
+            // 应用设置到扫描表单
+            document.getElementById('parallel').checked = settings.defaultParallel;
+            document.getElementById('incremental').checked = settings.defaultIncremental;
+        });
+
+        // 更新置信度值显示
+        document.getElementById('confidence-threshold').addEventListener('input', function() {
+            document.getElementById('confidence-value').textContent = this.value;
+        });
+
+        // 文件扫描
+        document.getElementById('file-scan-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('file');
+            if (!fileInput.files.length) {
+                alert('请选择文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/scan/file', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateResults(data);
+                // 切换到结果标签页
+                document.querySelector('a[href="#results"]').click();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('扫描失败: ' + error.message);
+            });
+        });
+
+        // 目录扫描
+        document.getElementById('directory-scan-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const directory = document.getElementById('directory').value;
+            if (!directory) {
+                alert('请输入目录路径');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('directory', directory);
+            
+            const exclude = document.getElementById('exclude').value;
+            if (exclude) {
+                exclude.split(',').forEach(pattern => {
+                    formData.append('exclude', pattern.trim());
+                });
+            }
+            
+            formData.append('parallel', document.getElementById('parallel').checked);
+            formData.append('incremental', document.getElementById('incremental').checked);
+
+            fetch('/scan/directory', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateResults(data);
+                // 切换到结果标签页
+                document.querySelector('a[href="#results"]').click();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('扫描失败: ' + error.message);
+            });
+        });
+
+        // 更新结果
+        function updateResults(data) {
+            // 更新计数
+            document.getElementById('high-count').textContent = data.summary.high;
+            document.getElementById('medium-count').textContent = data.summary.medium;
+            document.getElementById('low-count').textContent = data.summary.low;
+
+            // 更新图表
+            severityChart.data.datasets[0].data = [
+                data.summary.high,
+                data.summary.medium,
+                data.summary.low
+            ];
+            severityChart.update();
+
+            // 更新漏洞类型图表
+            const vulnerabilities = data.summary.vulnerabilities || {};
+            const sortedVulns = Object.entries(vulnerabilities)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            vulnerabilityChart.data.labels = sortedVulns.map(v => v[0]);
+            vulnerabilityChart.data.datasets[0].data = sortedVulns.map(v => v[1]);
+            vulnerabilityChart.update();
+
+            // 更新结果列表
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '';
+
+            if (Object.keys(data.results).length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> 未发现漏洞。
+                    </div>
+                `;
+                return;
+            }
+
+            for (const [filePath, matches] of Object.entries(data.results)) {
+                if (matches.length === 0) continue;
+
+                const fileCard = document.createElement('div');
+                fileCard.className = 'card mb-3';
+                
+                const fileHeader = document.createElement('div');
+                fileHeader.className = 'card-header file-item';
+                fileHeader.innerHTML = `
+                    <i class="bi bi-file-earmark-code"></i> ${filePath}
+                    <span class="badge bg-primary float-end">${matches.length}</span>
+                `;
+                
+                const fileContent = document.createElement('div');
+                fileContent.className = 'card-body';
+                fileContent.style.display = 'none';
+                
+                // 添加漏洞列表
+                const table = document.createElement('table');
+                table.className = 'table table-striped';
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>行号</th>
+                            <th>严重程度</th>
+                            <th>漏洞</th>
+                            <th>置信度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${matches.map(match => `
+                            <tr>
+                                <td>${match.lineNumber}</td>
+                                <td>
+                                    <span class="badge ${getSeverityClass(match.signature.severity)}">
+                                        ${getSeverityText(match.signature.severity)}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>${match.signature.name}</strong>
+                                    <p>${match.signature.description}</p>
+                                    <div class="code-block">${escapeHtml(match.matchedCode)}</div>
+                                </td>
+                                <td>${Math.round(match.confidence * 100)}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                
+                fileContent.appendChild(table);
+                fileCard.appendChild(fileHeader);
+                fileCard.appendChild(fileContent);
+                resultsContainer.appendChild(fileCard);
+                
+                // 添加点击事件
+                fileHeader.addEventListener('click', function() {
+                    if (fileContent.style.display === 'none') {
+                        fileContent.style.display = 'block';
+                    } else {
+                        fileContent.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // 获取严重程度样式类
+        function getSeverityClass(severity) {
+            switch (severity.toLowerCase()) {
+                case 'high': return 'bg-danger';
+                case 'medium': return 'bg-warning text-dark';
+                case 'low': return 'bg-info text-dark';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // 获取严重程度文本
+        function getSeverityText(severity) {
+            switch (severity.toLowerCase()) {
+                case 'high': return '高危';
+                case 'medium': return '中危';
+                case 'low': return '低危';
+                default: return severity;
+            }
+        }
+
+        // HTML转义
+        function escapeHtml(html) {
+            const div = document.createElement('div');
+            div.textContent = html;
+            return div.innerHTML;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+        });
+    </script>
+</body>
+</html> 

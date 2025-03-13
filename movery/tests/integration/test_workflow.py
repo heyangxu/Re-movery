@@ -7,7 +7,7 @@ import time
 from movery.detectors.vulnerability import VulnerabilityDetector
 from movery.utils.security import SecurityChecker
 from movery.analyzers.code_analyzer import CodeAnalyzer
-from movery.reporters.html_reporter import HTMLReporter
+from movery.reporters.html import HTMLReporter
 
 class TestWorkflow(unittest.TestCase):
     def setUp(self):

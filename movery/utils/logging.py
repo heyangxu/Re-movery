@@ -119,6 +119,11 @@ def setup_logging(log_file: Optional[str] = None, level: str = None):
     if level:
         config.logging.log_level = level
         
+    # Create logs directory in current directory for relative paths
+    if not os.path.isabs(config.logging.log_file):
+        log_dir = os.path.join(os.getcwd(), "logs")
+        config.logging.log_file = os.path.join(log_dir, config.logging.log_file)
+    
     # Create log directory if needed
     os.makedirs(os.path.dirname(config.logging.log_file), exist_ok=True)
     

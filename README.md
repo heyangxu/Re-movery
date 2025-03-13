@@ -65,7 +65,23 @@ go build -o movery ./cmd/movery
 
 4. 运行扫描:
 ```bash
-./movery -config config.json -target /path/to/your/code -output reports -memory 8.0
+# 扫描单个文件
+./movery scan --file path/to/file.py
+
+# 扫描目录
+./movery scan --dir path/to/directory
+
+# 排除特定文件或目录
+./movery scan --dir path/to/directory --exclude "node_modules,*.min.js"
+
+# 生成HTML报告
+./movery scan --dir path/to/directory --output report.html
+
+# 启用并行处理
+./movery scan --dir path/to/directory --parallel
+
+# 启用增量扫描
+./movery scan --dir path/to/directory --incremental
 ```
 
 ### Go版本特性
@@ -75,15 +91,37 @@ go build -o movery ./cmd/movery
 - 内存使用监控
 - 工作池调度
 - 结果缓存机制
-- 当前主要支持Go语言，其他语言支持陆续添加中
+- 多种接口选项：命令行、Web界面和API接口
+- 生成HTML、JSON和XML格式的报告
+- 与CI/CD工具集成（GitHub Actions、GitLab CI）
+- 当前支持Python和JavaScript语言，其他语言支持陆续添加中
 
 ### Go版本命令行参数
 
-- `-config`: 配置文件路径 (默认: config.json)
-- `-target`: 目标扫描目录或文件 (默认: .)
-- `-output`: 报告输出目录 (默认: reports)
-- `-verbose`: 启用详细日志 (默认: false)
-- `-memory`: 最大内存使用量(GB) (默认: 8.0)
+- `scan`: 扫描文件或目录
+  - `--file`: 指定要扫描的文件
+  - `--dir`: 指定要扫描的目录
+  - `--exclude`: 排除特定文件或目录（逗号分隔）
+  - `--output`: 报告输出路径
+  - `--format`: 报告格式（html, json, xml）
+  - `--parallel`: 启用并行处理
+  - `--incremental`: 启用增量扫描
+  - `--confidence`: 置信度阈值（0.0-1.0）
+
+- `web`: 启动Web界面
+  - `--host`: 指定主机（默认: localhost）
+  - `--port`: 指定端口（默认: 8080）
+  - `--debug`: 启用调试模式
+
+- `server`: 启动API服务器
+  - `--host`: 指定主机（默认: localhost）
+  - `--port`: 指定端口（默认: 8081）
+  - `--debug`: 启用调试模式
+
+- `generate`: 生成集成文件
+  - `github-action`: 生成GitHub Actions工作流文件
+  - `gitlab-ci`: 生成GitLab CI配置文件
+  - `vscode-extension`: 生成VS Code扩展配置文件
 
 ## 共同特性
 
@@ -116,39 +154,46 @@ re-movery/
   │   └── reporters/    # 报告生成器
   │
   ├── go/               # Go实现
-  │   ├── cmd/         # 命令行工具
-  │   │   └── movery/  # 主程序
-  │   ├── internal/    # 内部包
-  │   │   ├── config/  # 配置管理
-  │   │   ├── utils/   # 工具函数
-  │   │   ├── analyzers/# 代码分析器
+  │   ├── cmd/          # 命令行工具
+  │   │   └── movery/   # 主程序
+  │   ├── internal/     # 内部包
+  │   │   ├── cmd/      # 命令行命令
+  │   │   ├── config/   # 配置管理
+  │   │   ├── core/     # 核心功能
   │   │   ├── detectors/# 漏洞检测器
-  │   │   └── reporters/# 报告生成器
-  │   ├── pkg/         # 公共包
-  │   │   └── types/   # 类型定义
-  │   └── web/         # Web相关
-  │       └── templates/# HTML模板
+  │   │   ├── reporters/# 报告生成器
+  │   │   ├── api/      # API服务器
+  │   │   └── web/      # Web应用
+  │   └── pkg/          # 公共包
   │
-  └── docs/            # 文档
+  └── docs/             # 文档
 ```
 
 ## 配置说明
 
 ### 配置文件
 
-两个版本都使用`config.json`进行配置，示例如下:
+两个版本都支持配置文件，Go版本支持JSON和YAML格式：
 
-```json
-{
-    "processing": {
-        "num_workers": 4,        # 工作进程/协程数
-        "enable_cache": true     # 启用缓存
-    },
-    "detector": {
-        "min_similarity": 0.8,   # 最小相似度
-        "enable_semantic_match": true  # 启用语义匹配
-    }
-}
+```yaml
+# re-movery.yaml
+scanner:
+  parallel: true
+  incremental: true
+  confidenceThreshold: 0.7
+  excludePatterns:
+    - node_modules
+    - "*.min.js"
+
+web:
+  host: localhost
+  port: 8080
+  debug: false
+
+server:
+  host: localhost
+  port: 8081
+  debug: false
 ```
 
 ### 漏洞签名
@@ -161,7 +206,7 @@ re-movery/
         {
             "id": "CWE-78",
             "name": "OS命令注入",
-            "severity": "严重",
+            "severity": "high",
             "code_patterns": [
                 "os\\.system\\(.*\\)"
             ]
@@ -170,10 +215,54 @@ re-movery/
 }
 ```
 
+## API文档
+
+### 扫描代码
+
+```
+POST /api/scan/code
+Content-Type: application/json
+
+{
+  "code": "代码内容",
+  "language": "python",
+  "fileName": "example.py"
+}
+```
+
+### 扫描文件
+
+```
+POST /api/scan/file
+Content-Type: multipart/form-data
+
+file: [文件内容]
+```
+
+### 扫描目录
+
+```
+POST /api/scan/directory
+Content-Type: application/json
+
+{
+  "directory": "/path/to/directory",
+  "excludePatterns": ["node_modules", "*.min.js"],
+  "parallel": true,
+  "incremental": false
+}
+```
+
+### 获取支持的语言
+
+```
+GET /api/languages
+```
+
 ## 版本选择建议
 
 - 如果您需要分析多种编程语言的代码，建议使用Python版本
-- 如果您主要分析Go语言代码，或对性能有较高要求，建议使用Go版本
+- 如果您主要分析Python和JavaScript代码，或对性能有较高要求，建议使用Go版本
 - 两个版本的检测结果是兼容的，可以根据需要混合使用
 
 ## 贡献
