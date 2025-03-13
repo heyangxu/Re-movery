@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re-movery Vulnerability Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        .vulnerability-card {
+            margin-bottom: 1rem;
+        }
+        .severity-high {
+            color: #dc3545;
+        }
+        .severity-medium {
+            color: #ffc107;
+        }
+        .severity-low {
+            color: #28a745;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Re-movery Vulnerability Report</h1>
+        
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Report Summary</h5>
+                        <p class="card-text">Generated at: {{.GeneratedAt}}</p>
+                        <p class="card-text">Total Files Scanned: {{.TotalFiles}}</p>
+                        <p class="card-text">Total Vulnerabilities Found: {{.TotalMatches}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="severityChart" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="typeChart" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4">Detailed Findings</h2>
+        {{range .Vulnerabilities}}
+        <div class="card vulnerability-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {{.Signature.Name}}
+                    <span class="float-end severity-{{.Signature.Severity | lower}}">
+                        {{.Signature.Severity}}
+                    </span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">ID: {{.Signature.ID}}</h6>
+                <p class="card-text">{{.Signature.Description}}</p>
+                
+                <div class="mb-3">
+                    <strong>File:</strong> {{.File}}<br>
+                    <strong>Line:</strong> {{.Line}}<br>
+                    <strong>Confidence:</strong> {{printf "%.1f%%" (mul .Confidence 100)}}
+                </div>
+
+                <div class="code-block">
+                    <pre><code>{{.Code}}</code></pre>
+                </div>
+
+                {{if .Context}}
+                <div class="mt-3">
+                    <h6>Context:</h6>
+                    <div class="code-block">
+                        <pre><code>{{range .Context}}{{.}}
+{{end}}</code></pre>
+                    </div>
+                </div>
+                {{end}}
+
+                {{if .Signature.References}}
+                <div class="mt-3">
+                    <h6>References:</h6>
+                    <ul>
+                        {{range .Signature.References}}
+                        <li><a href="{{.}}" target="_blank">{{.}}</a></li>
+                        {{end}}
+                    </ul>
+                </div>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <script>
+        // Initialize charts
+        var severityChart = echarts.init(document.getElementById('severityChart'));
+        var typeChart = echarts.init(document.getElementById('typeChart'));
+
+        // Set chart options
+        severityChart.setOption({{.SeverityChart}});
+        typeChart.setOption({{.TypeChart}});
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            severityChart.resize();
+            typeChart.resize();
+        });
+    </script>
+</body>
+</html> 
