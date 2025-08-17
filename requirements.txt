@@ -9,4 +9,5 @@ beautifulsoup4>=4.9.3
 lxml>=4.6.3
 pygments>=2.9.0
 typing-extensions>=3.10.0
-dataclasses>=0.8;python_version<"3.7" 
+dataclasses>=0.8;python_version<"3.7"
+astroid>=2.15.0
